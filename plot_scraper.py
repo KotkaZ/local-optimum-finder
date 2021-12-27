@@ -14,7 +14,7 @@ INPUT_TYPE = "input/?i=local+extrema+"
 DRIVER = "./drivers/chrome_96/chromedriver.exe"
 
 FUNCTIONS_FILE = "functions.txt"
-OUTPUT_DIR = "./downloads/"
+OUTPUT_DIR = "./build/"
 
 
 def build_url(url: str) -> str:
@@ -26,7 +26,7 @@ def get_output_path(index: int) -> str:
     if not os.path.isdir(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    return OUTPUT_DIR + str(index) + ".jpg"
+    return OUTPUT_DIR + str(index) + ".png"
 
 
 def populate_chrome() -> selenium.webdriver:
@@ -43,8 +43,16 @@ def find_plot_img(driver: selenium.webdriver) -> str:
     return img.get_attribute('src')
 
 
+def download_image(driver: selenium.webdriver, index: int) -> None:
+    try:
+        img_url = find_plot_img(driver)
+        urllib.request.urlretrieve(img_url, get_output_path(index))
+    except:
+        print("Didn't find image for", index)
+
+
 with open(FUNCTIONS_FILE) as functions:
-    for index, function in enumerate(functions):
+    for i, function in enumerate(functions):
         url = build_url(function)
 
         chrome = populate_chrome()
@@ -52,8 +60,7 @@ with open(FUNCTIONS_FILE) as functions:
 
         time.sleep(5)
 
-        img_url = find_plot_img(chrome)
+        download_image(driver=chrome, index=i)
 
-        # Download image
-        urllib.request.urlretrieve(img_url, get_output_path(index))
+
 
