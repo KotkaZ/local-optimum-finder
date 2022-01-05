@@ -16,7 +16,6 @@ INPUT_TYPE_PLOT = INPUT_TYPE+"plot+"
 # Download additional drivers if needed.
 DRIVER = "./drivers/chrome_96/chromedriver.exe"
 
-PATH_TO_TESSERACT = "../PYTESSERACT/tesseract.exe" # TODO to conf file
 OUTPUT_DIR = "./build/test_funcs/"
 OUTPUT_DIR_MARKED = OUTPUT_DIR + "marked/"
 DST_FUNCTIONS_FILE = OUTPUT_DIR + "test_functions.txt"
@@ -91,7 +90,6 @@ def download_graph(url: str,i: int)->bool:
 if not os.path.isdir(OUTPUT_DIR_MARKED):
     os.makedirs(OUTPUT_DIR_MARKED)
 
-pytesseract.tesseract_cmd = PATH_TO_TESSERACT
 with open(DST_FUNCTIONS_FILE, mode="w") as dst_file:
     for i in range(NR_OF_FUNS_TO_GEN):
         function = generate_function(i)
