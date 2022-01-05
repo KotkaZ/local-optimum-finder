@@ -22,21 +22,20 @@ DRIVER = "./drivers/chrome_96/chromedriver.exe"
 
 PATH_TO_TESSERACT = "../PYTESSERACT/tesseract.exe" # TODO to conf file
 OUTPUT_DIR = "./build/test_funcs/"
+OUTPUT_DIR_MARKED = OUTPUT_DIR + "marked/"
 DST_FUNCTIONS_FILE = OUTPUT_DIR + "test_functions.txt"
 
-NR_OF_FUNS_TO_GEN = 5 # TODO to conf file
+NR_OF_FUNS_TO_GEN = 20 # TODO to conf file
 
 def build_url(url: str, is_marked: bool) -> str:
     return WOLFRAM_URL + (INPUT_TYPE_EXTREMA if is_marked else INPUT_TYPE_PLOT) + urllib.parse.quote_plus(url)
 
-
-def get_output_path(index: int, is_marked: bool) -> str:
+def get_output_path(index: int) -> str:
     # Create output directory if not exists.
-    DIR = OUTPUT_DIR + ("marked/" if is_marked else "unmarked/")
+    DIR = OUTPUT_DIR_MARKED
     if not os.path.isdir(DIR):
         os.makedirs(DIR)
-
-    return DIR + str(index) + ".png"
+    return DIR + str(index) + ".gif"
 
 
 def populate_chrome() -> selenium.webdriver:
@@ -56,12 +55,14 @@ def find_plot_img(driver: selenium.webdriver) -> str:
     return img.get_attribute('src')
 
 
-def download_image(driver: selenium.webdriver, index: int, is_marked: bool) -> None:
+def download_image(driver: selenium.webdriver, index: int)->bool:
     try:
         img_url = find_plot_img(driver)
-        urllib.request.urlretrieve(img_url, get_output_path(index,is_marked))
+        urllib.request.urlretrieve(img_url, get_output_path(index))
+        return True
     except:
         print("Didn't find image for", index)
+        return False
 
 # Generates random polynomial function.
 # Higest degree in function could be 10
@@ -81,19 +82,18 @@ def generate_function(seed:int) -> str:
 
     return function
 
-def download_graph(url: str,i: int, is_marked: bool)->str:
+def download_graph(url: str,i: int)->bool:
     chrome = populate_chrome()
     chrome.get(url)
 
     time.sleep(5)
 
-    download_image(driver=chrome, index=i, is_marked=is_marked)
-    return ""
+    return download_image(driver=chrome, index=i)
 
 
 # Create output directory if not exists.
-if not os.path.isdir(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+if not os.path.isdir(OUTPUT_DIR_MARKED):
+    os.makedirs(OUTPUT_DIR_MARKED)
 
 pytesseract.tesseract_cmd = PATH_TO_TESSERACT
 with open(DST_FUNCTIONS_FILE, mode="w") as dst_file:
@@ -103,16 +103,18 @@ with open(DST_FUNCTIONS_FILE, mode="w") as dst_file:
 
         # Find graph with marked local extremas if exists
         url = build_url(function, True)
-        download_graph(url, i, True)
-        try:
+        suc = download_graph(url, i)
+        if not suc:
+            url = build_url(function, False)
+            download_graph(url, i)
+        """ try:
             img = Image.open(get_output_path(i,True))
             big_img = img.resize((1000, int(1000/img.size[0]*img.size[1]))) # To increase text recognition accuarcy
             text = pytesseract.image_to_string(big_img)
             text = re.search(r"\(x from -?\d+(.\d+)? to -?\d+(.\d+)?\)", text).group() + " " #(x from <float> to <float>)
         except:
             text = ""
-
         # Find graph without marked local extremas
         url = build_url(text+function, False)
-        download_graph(url, i, False)
+        download_graph(url, i, False) """
 

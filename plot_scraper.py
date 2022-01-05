@@ -8,7 +8,7 @@ from selenium import webdriver
 
 
 WOLFRAM_URL = "https://www.wolframalpha.com/"
-INPUT_TYPE = "input/?i=local+extrema+"
+INPUT_TYPE = "input/?i="#local+extrema+"
 
 # Download additional drivers if needed.
 DRIVER = "./drivers/chrome_96/chromedriver.exe"
@@ -39,7 +39,10 @@ def populate_chrome() -> selenium.webdriver:
 
 
 def find_plot_img(driver: selenium.webdriver) -> str:
-    img = driver.find_element_by_xpath('//img[@alt="Plot"]')
+    try:
+        img = driver.find_element_by_xpath('//img[@alt="Plot"]')
+    except:
+        img = driver.find_element_by_xpath('//img[@alt="Plots"]')
     return img.get_attribute('src')
 
 
