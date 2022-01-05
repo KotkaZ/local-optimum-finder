@@ -3,10 +3,6 @@ import urllib.request
 import time
 import os
 import random as rn
-import re
-
-from PIL import Image
-from pytesseract import pytesseract
 
 import selenium.webdriver
 from selenium import webdriver
@@ -107,14 +103,4 @@ with open(DST_FUNCTIONS_FILE, mode="w") as dst_file:
         if not suc:
             url = build_url(function, False)
             download_graph(url, i)
-        """ try:
-            img = Image.open(get_output_path(i,True))
-            big_img = img.resize((1000, int(1000/img.size[0]*img.size[1]))) # To increase text recognition accuarcy
-            text = pytesseract.image_to_string(big_img)
-            text = re.search(r"\(x from -?\d+(.\d+)? to -?\d+(.\d+)?\)", text).group() + " " #(x from <float> to <float>)
-        except:
-            text = ""
-        # Find graph without marked local extremas
-        url = build_url(text+function, False)
-        download_graph(url, i, False) """
 
