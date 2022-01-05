@@ -17,6 +17,7 @@ with open(COORDINATES_FILE, "w", encoding="utf-8") as dst_f:
         plot_img = cv.imread(path)
         if plot_img is None:
             print("test")
+            dst_f.write(str([]) + "\n")
             continue
 
         res = cv.matchTemplate(plot_img, template, cv.TM_CCOEFF_NORMED)

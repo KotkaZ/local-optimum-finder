@@ -2,13 +2,16 @@ import cv2 as cv
 import numpy as np
 import os
 import random as rn
-from PIL import Image
 
-BUILD_DIR = "./build/test_funcs/"
+
+BUILD_DIR = "./build/"
 BUILD_DIR_MARKED = BUILD_DIR + "marked/"
 BUILD_DIR_UNMARKED = BUILD_DIR + "unmarked/"
 EXTREMUM_TEMPLATE = "./templates/red_dot.png"
 DST_COORDINATES_FILE = BUILD_DIR_MARKED + "coordinates.txt"
+
+if not os.path.isdir(BUILD_DIR_UNMARKED):
+    os.makedirs(BUILD_DIR_UNMARKED)
 
 template = cv.imread(EXTREMUM_TEMPLATE)
 _, w, h = template.shape[::-1]
