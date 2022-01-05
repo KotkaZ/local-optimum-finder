@@ -5,10 +5,9 @@ Images are downloaded into project's downloads folder and are not committed to r
 
 NB! Plot scraper uses Selenium webdriver to scrape the images. Please make sure you have selected the proper driver according to you default web-browser
 
-# Plan for future development
+# Run guide
 
-1. Generate/plan out at least 100 different functions.
-2. Use CV to find extremum point coordinates in the images. 
-3. Make script to generate function drawings without extremum points.
-4. Generate some test data.
-5. Do some AI magic!
+1. python generate_func.py
+2. python plot_scraper.py
+3. python coordinates_finder.py
+4. python dot_remover.py NOT WORKING

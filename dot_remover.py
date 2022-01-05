@@ -16,12 +16,6 @@ with open(DST_COORDINATES_FILE, "w", encoding="utf-8") as dst_f:
     for idx in range(len(os.listdir(BUILD_DIR_MARKED))):
         path = BUILD_DIR_MARKED + str(idx) + ".gif"
 
-        # Muudame faili tüübi
-        try:
-            img = Image.open(path)
-            img.save(path[:-3]+"png",'png', optimize=True, quality=80)
-        except:
-            continue
 
         plot_img = cv.imread(path[:-3]+"png")
         if plot_img is None:

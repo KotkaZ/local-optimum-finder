@@ -1,1 +1,5 @@
 selenium
+requests
+PIL
+cv2
+numpy

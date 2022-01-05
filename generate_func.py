@@ -1,63 +1,12 @@
-import urllib.parse
-import urllib.request
-import time
 import os
 import random as rn
 
-import selenium.webdriver
-from selenium import webdriver
 
+BUILD_DIR = "./build/"
+FUNCTIONS_FILE = BUILD_DIR + "functions.txt"
 
-WOLFRAM_URL = "https://www.wolframalpha.com/"
-INPUT_TYPE = "input/?i="
-INPUT_TYPE_EXTREMA = INPUT_TYPE+"local+extrema+"
-INPUT_TYPE_PLOT = INPUT_TYPE+"plot+"
+GENERATION_NUMBER = 20
 
-# Download additional drivers if needed.
-DRIVER = "./drivers/chrome_96/chromedriver.exe"
-
-OUTPUT_DIR = "./build/test_funcs/"
-OUTPUT_DIR_MARKED = OUTPUT_DIR + "marked/"
-DST_FUNCTIONS_FILE = OUTPUT_DIR + "test_functions.txt"
-
-NR_OF_FUNS_TO_GEN = 20 # TODO to conf file
-
-def build_url(url: str, is_marked: bool) -> str:
-    return WOLFRAM_URL + (INPUT_TYPE_EXTREMA if is_marked else INPUT_TYPE_PLOT) + urllib.parse.quote_plus(url)
-
-def get_output_path(index: int) -> str:
-    # Create output directory if not exists.
-    DIR = OUTPUT_DIR_MARKED
-    if not os.path.isdir(DIR):
-        os.makedirs(DIR)
-    return DIR + str(index) + ".gif"
-
-
-def populate_chrome() -> selenium.webdriver:
-    # Start driver in headless mode.
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.headless = True
-
-    return webdriver.Chrome(executable_path=DRIVER, options=chrome_options)
-
-
-def find_plot_img(driver: selenium.webdriver) -> str:
-    try:
-        img = driver.find_element_by_xpath('//img[@alt="Plot"]')
-    except:
-        img = driver.find_element_by_xpath('//img[@alt="Plots"]')
-    return img.get_attribute('src')
-
-
-def download_image(driver: selenium.webdriver, index: int)->bool:
-    try:
-        img_url = find_plot_img(driver)
-        urllib.request.urlretrieve(img_url, get_output_path(index))
-        return True
-    except:
-        print("Didn't find image for", index)
-        return False
 
 # Generates random polynomial function.
 # Higest degree in function could be 10
@@ -77,28 +26,12 @@ def generate_function(seed:int) -> str:
 
     return function
 
-def download_graph(url: str,i: int)->bool:
-    chrome = populate_chrome()
-    chrome.get(url)
-
-    time.sleep(5)
-
-    return download_image(driver=chrome, index=i)
-
 
 # Create output directory if not exists.
-if not os.path.isdir(OUTPUT_DIR_MARKED):
-    os.makedirs(OUTPUT_DIR_MARKED)
+if not os.path.isdir(BUILD_DIR):
+    os.makedirs(BUILD_DIR)
 
-with open(DST_FUNCTIONS_FILE, mode="w") as dst_file:
-    for i in range(NR_OF_FUNS_TO_GEN):
+with open(FUNCTIONS_FILE, mode="w") as dst_file:
+    for i in range(GENERATION_NUMBER):
         function = generate_function(i)
         dst_file.write(function+"\n")
-
-        # Find graph with marked local extremas if exists
-        url = build_url(function, True)
-        suc = download_graph(url, i)
-        if not suc:
-            url = build_url(function, False)
-            download_graph(url, i)
-

@@ -1,20 +1,25 @@
 import urllib.parse
-import urllib.request
+import requests
 import time
 import os
-
 import selenium.webdriver
+
+from PIL import Image
+from io import BytesIO
 from selenium import webdriver
 
 
 WOLFRAM_URL = "https://www.wolframalpha.com/"
-INPUT_TYPE = "input/?i="#local+extrema+"
+INPUT_TYPE = "input/?i=local+extrema+"
 
 # Download additional drivers if needed.
 DRIVER = "./drivers/chrome_96/chromedriver.exe"
 
-FUNCTIONS_FILE = "functions.txt"
-OUTPUT_DIR = "./build/"
+BUILD_DIR = "./build/"
+FUNCTIONS_FILE = BUILD_DIR + "functions.txt"
+FUNCTIONS_MARKED = BUILD_DIR + "marked/"
+
+DOWNLOAD_TIMEOUT = 5
 
 
 def build_url(url: str) -> str:
@@ -22,11 +27,7 @@ def build_url(url: str) -> str:
 
 
 def get_output_path(index: int) -> str:
-    # Create output directory if not exists.
-    if not os.path.isdir(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
-    return OUTPUT_DIR + str(index) + ".png"
+    return FUNCTIONS_MARKED + str(index) + ".png"
 
 
 def populate_chrome() -> selenium.webdriver:
@@ -46,24 +47,41 @@ def find_plot_img(driver: selenium.webdriver) -> str:
     return img.get_attribute('src')
 
 
-def download_image(driver: selenium.webdriver, index: int) -> None:
+def download_image(driver: selenium.webdriver, index: int) -> bool:
     try:
         img_url = find_plot_img(driver)
-        urllib.request.urlretrieve(img_url, get_output_path(index))
+        path = get_output_path(index)
+        response = requests.get(img_url)
+        img = Image.open(BytesIO(response.content))
+        img.save(path, 'png', optimize=True, quality=80)
+        return True
     except:
-        print("Didn't find image for", index)
+        return False
 
+
+# Create output directory if not exists.
+if not os.path.isdir(BUILD_DIR):
+    os.makedirs(BUILD_DIR)
+if not os.path.isdir(FUNCTIONS_MARKED):
+    os.makedirs(FUNCTIONS_MARKED)
 
 with open(FUNCTIONS_FILE) as functions:
-    for i, function in enumerate(functions):
+    chrome = populate_chrome()
+
+    i = 0
+    for function in functions:
         url = build_url(function)
 
-        chrome = populate_chrome()
         chrome.get(url)
 
-        time.sleep(5)
-
-        download_image(driver=chrome, index=i)
-
-
-
+        time_spent = 0
+        success = False
+        while time_spent < DOWNLOAD_TIMEOUT:
+            time.sleep(0.5)
+            time_spent += 0.5
+            success = download_image(driver=chrome, index=i)
+            if success:
+                i += 1
+                break
+        if not success:
+            print("Didn't find picture for " + function)
