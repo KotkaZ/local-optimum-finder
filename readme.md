@@ -10,4 +10,4 @@ NB! Plot scraper uses Selenium webdriver to scrape the images. Please make sure 
 1. python generate_func.py
 2. python plot_scraper.py
 3. python coordinates_finder.py
-4. python dot_remover.py NOT WORKING
+4. python dot_remover.py

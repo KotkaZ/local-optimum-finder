@@ -39,7 +39,13 @@ def get_train_data():
     coordinates = []
     with open(BUILD_COORDINATES_FILE, "r", encoding="utf-8") as coord_file:
         lines = coord_file.readlines()
-        # TODO
+        for line in lines:
+            splitted_line = line.strip()[2:-2].replace(" ", "").split("),(")
+            locs = []
+            for x in splitted_line:
+                locs.append(tuple(int(y) for y in x.split(",")))
+
+            coordinates.append(locs)
 
     return (marked_imgs, unmarked_imgs, coordinates)
 
