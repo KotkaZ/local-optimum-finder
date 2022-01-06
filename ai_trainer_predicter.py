@@ -37,7 +37,7 @@ def get_train_data():
         print("Error: {} does not exist".format("coordinates.txt"))
         raise ValueError
 
-    marked_imgs = load_from_dir(BUILD_DIR_MARKED, ".png")
+    #marked_imgs = load_from_dir(BUILD_DIR_MARKED, ".png")
     unmarked_imgs = load_from_dir(BUILD_DIR_UNMARKED, ".jpg")
     coordinates = []
     with open(BUILD_COORDINATES_FILE, "r", encoding="utf-8") as coord_file:
@@ -50,29 +50,30 @@ def get_train_data():
 
             coordinates.append(locs)
 
-    return (marked_imgs, unmarked_imgs, coordinates)
+    return (unmarked_imgs, coordinates)
 
-def train_model():
+def train_model(X_train, y_train):
     x = Input(shape=(210, 130))
-    c1 = Conv2D(210, (3, 3), strides=1, padding="same")(x)
+    c1 = Conv2D(210, (5, 5), strides=1, padding="same")(x)
     b1 = BatchNormalization()(c1)
     a1 = Activation('relu')(b1)
-    c2 = Conv2D(32, (3, 3), strides=1, padding="valid")(a1)
+    c2 = Conv2D(210, (5, 5), strides=1, padding="valid")(a1)
     b2 = BatchNormalization()(c2)
     a2 = Activation('relu')(b2)
-    p2 = MaxPooling2D(pool_size=(2,2))(a2)
+    p2 = MaxPooling2D(pool_size=(3,3))(a2)
     d2 = Dropout(0.25)(p2)
     f2 = Flatten()(d2)
     h3 = Dense(100)(f2)
     b3 = BatchNormalization()(h3)
     a3 = Activation('relu')(b3)
     d3 = Dropout(0.25)(a3)
-    z = Dense(10)(d3)
-    p = Activation('softmax')(z)
+    z = Dense(2,activation='softmax')(d3)
 
-    model = Model(inputs=x, outputs=p)
+    model = Model(inputs=x, outputs=z)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
-    return model
+
+    history = model.fit(X_train, y_train, batch=256, epochs=1)
+    return model, history
 
 def save_model(model):
     model = None
