@@ -13,6 +13,9 @@ BUILD_DIR_PROCESSED_UNMARKED = BUILD_DIR_PROCESSED + "unmarked/"
 BUILD_COORDINATES_FILE = BUILD_DIR + "coordinates.txt"
 BUILD_COORDINATES_PROCESSED_FILE = BUILD_DIR_PROCESSED + "coordinates.txt"
 
+X_SIZE = 270
+Y_SIZE = 130
+
 
 def transform_images(src_dir: str, out_dir: str) -> [(float, float)]:
     rescale_factors = []
@@ -22,10 +25,11 @@ def transform_images(src_dir: str, out_dir: str) -> [(float, float)]:
         img = cv.imread(path)
         if img is None:
             continue
-        rescale_factors.append((img.shape[0] / 210, img.shape[1] / 130))
+
+        rescale_factors.append((img.shape[0] / X_SIZE, img.shape[1] / Y_SIZE))
         img_grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         (thresh, img_black_white) = cv.threshold(img_grey, 127, 255, cv.THRESH_BINARY)
-        crop_img = cv.resize(img_black_white, dsize=(210,130), interpolation=cv.INTER_AREA)
+        crop_img = cv.resize(img_black_white, dsize=(X_SIZE, Y_SIZE), interpolation=cv.INTER_AREA)
 
         crop_img = crop_img[:,:-60].copy()
         new_path = out_dir + str(idx) + ".png"

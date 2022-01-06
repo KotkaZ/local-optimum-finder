@@ -38,5 +38,5 @@ with open(COORDINATES_FILE, encoding="utf-8") as f:
             # rectangle(pilt, algusnurk (koordinaadid), lõppnurk, värv (BGR), joone paksus)
             #cv.rectangle(img_rgb_new, pt, (pt[0]+w, pt[1]+h), (0,255,255), 2)
 
-        cv.imwrite(BUILD_DIR_UNMARKED + str(idx)+ ".jpg", plot_img)
+        cv.imwrite(BUILD_DIR_UNMARKED + str(idx)+ ".png", plot_img)
 
