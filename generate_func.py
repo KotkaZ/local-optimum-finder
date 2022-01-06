@@ -1,11 +1,12 @@
 import os
 import random as rn
+import sys
 
 
 BUILD_DIR = "./build/"
 FUNCTIONS_FILE = BUILD_DIR + "functions.txt"
 
-GENERATION_NUMBER = 20
+GENERATION_NUMBER = int(sys.argv[0])
 
 
 # Generates random polynomial function.

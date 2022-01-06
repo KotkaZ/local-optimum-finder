@@ -3,3 +3,6 @@ requests
 PIL
 cv2
 numpy
+keras
+tensorflow
+sklearn

@@ -1,0 +1,66 @@
+= Lokaasete ekstreemumpunktide tuvastamine graafil
+Karl Rapur, Tiit Vaino
+v1.0, 2022-01-06
+
+
+Töö eesmärk on luua masinõppe algoritm, mis suudab pildil oleval graafil osutada lokaalsetele ekstreemumitele.
+Valmis mudelile saab anda ette ükskõik, millise graafiku mis pärineb WolframAlpha keskkonnast või sarnaneb suuremal
+määral sealsete graafikutega. Lokaalseid ekstreemumpunkte saab matemaatikas käsitsi välja arvutada,
+kuid tegelikkuses on teema oluliselt lihtsam ning pildi peal on võimalik umbmääraselt punkti asukohta alati määrata,
+sõltumata funktsiooni keerukusest. Seetõttu tundub see sobilik ülesannete masinõppe jaoks.
+
+== Kasutatud ideed:
+* Funktsioonide genereerimine
+* Andmete pärimine WolframAlphast - Andmete pärimise idee võtsime juturobotite praktikumidest,
+kuid JavaScripti vajaduse tõttu lõime täiesti oma koodi ja loogika.
+* Pilditöötlus - Omavajaduste järgi loodud.
+* Pildil mustrisobitamine - Töös kasutatakse pisemat sorti mustri sobitamist,
+et tuvastada arvutatud piltidel ekstreemumeid. Idee pärineb praktikumidest.
+* Tehisnärvivõrgud
+* LineaarneRegresioon
+
+== Töö panus
+
+Kogu algandmete tootmine on loodud meie endi poolt. Kodutöös pole selliseid osi, millele kohta viidata välismaterjalidele.
+
+== Testimise võimalused
+Kogu rakendus on võimeline ennast ise looma ja välja õpetama.
+Selleks tuleb jooksutada järgnevaid käsklusi järestikku.
+[source, python]
+----
+# Paigaldab kõik vajalikud pip moodulid.
+pip install -r requirements.txt
+
+# Genereerib 1000 erinevat polunoom funktsiooni.
+python generate_func.py 1000
+
+# Laadib alla WolframAlphast 1000 funktsiooni ekstreemum punktidega graafikud.
+# Kui ei leidu, siis jätab tõmbamata.
+python plot_scraper.py
+
+# Leiab piltidelt ekstreemumpunktide koordinaadid pikslite alusel.
+python coordinates_finder.py
+
+# Loob testandmete, kus on ekstreemumpunkt kaotatud.
+python dot_remover.py
+
+# Töötleb pildid masinõppeks sobivale kujule.
+python image_processing.py
+
+----
+
+Kiiruse huvides on kodutöös kaasa pandud kogu `build` kausta sisu ning
+eespool mainitud käsklusi tegelikkuses jooksutama ei pea. Graafikute allalaadimine on ajaliselt väga kulukas töö.
+
+Mudeli õpetamiseks on järgnev käsklus.
+
+[source, python]
+----
+# Teostab masinõppe
+python ai_trainer_predicter.py
+----
+
+
+== Töökäigu kirjeldus.
+
+Töö käigu kirjeldus: millised olid probleemid, mis õnnestus, mis jäi realiseerimata jne (kirjeldatud probleemid ega puudused ei mõju hindele kuidagi negatiivselt)
