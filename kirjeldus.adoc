@@ -17,11 +17,20 @@ kuid JavaScripti vajaduse tõttu lõime täiesti oma koodi ja loogika.
 * Pildil mustrisobitamine - Töös kasutatakse pisemat sorti mustri sobitamist,
 et tuvastada arvutatud piltidel ekstreemumeid. Idee pärineb praktikumidest.
 * Tehisnärvivõrgud
-* LineaarneRegresioon
+* LineaarneRegresioon - Ei andnud sobivat tulemust.
 
 == Töö panus
 
 Kogu algandmete tootmine on loodud meie endi poolt. Kodutöös pole selliseid osi, millele kohta viidata välismaterjalidele.
+Teema oli võõras ning internetist ei leidnud palju abi.
+
+Ainuüksi andmete kättesaamiseks kulus korralikult üle 10 tunni tööd. Andmete kokku scrape'imine oli väga tülikas.
+Siis selgus, et punase täpuga oskab AI väga täpselt ennustada, mistõttu pidime leidma graafikud ilma punaste täppideta.
+Selliseid graafikuid ei leidunud, mistõttu eemladasime koodi teel punased täpid ja joonistasime jooned asemele.
+
+Palju hingi, verd ja pisaraid.
+
+Lõpptulemust ei saavutatud, sest erinevad treenitud mudelid ei suutnud korrektselt ennustada.
 
 == Testimise võimalused
 Kogu rakendus on võimeline ennast ise looma ja välja õpetama.
@@ -61,6 +70,37 @@ python ai_trainer_predicter.py
 ----
 
 
+Katsetamine
+[source, python]
+----
+# Katsetamine
+python ai.py 'file_path'
+----
+
+
 == Töökäigu kirjeldus.
 
-Töö käigu kirjeldus: millised olid probleemid, mis õnnestus, mis jäi realiseerimata jne (kirjeldatud probleemid ega puudused ei mõju hindele kuidagi negatiivselt)
+Andmete kättesaamiseks tegime esmalt funktsioonide genreerimise.
+Loodud polünnomaalsed funktsioonid kirjutatakse faili.
+
+Funktsioonide faili põhjal tõmmatakse alla WolframAlphast vastavad funktsioonid.
+Kui neid ei leidu, siis ei laeta alla. Seega pilte on vähem kui funktsioone.
+
+Piltidelt leitakse openCV abil ekstreemumpunktide koordinaadid ja kirjutatakse faili.
+
+Kõik pildid töödeldakse väiksemaks ja halli skaalale. Muudatused viiakse läbi ka leitud koordinaatides.
+
+
+Peame ausalt tunnistama, et teema oli üle meie oskuste.
+Andmete kättesaamine osutus väga keerukaks ning võttis meeletus koguses aega.
+AI välja õpetamiseks me ei osanud andmeid enda jaoks sobivale kujule saada.
+Lineaarse regresiooniga proovides ennustas mudel ebamääraseid andmeid. Suur probleem oli see,
+et ühel graafikul võis olla mitu ekstreemumpunkti.
+
+Teine lähenemine oli tehisnärvivõrkudega. Proovisime saada väljundiks
+pidliga sama suurt massiivi, kus igale piksile vastaks mingi kindluse väärtus.
+See ei andnud soovitud tulemust, sest kõikide pikslite korral olid väärtused 0.2 ringis madalad.
+Mudelit treenides oli täpsus kõrge, kuid see ei olnud koosokõlas tulemusega.
+
+Ajaline kulu on kahe autori peale kokku ligemale 25-30 tundi.
+Me ei suutunud saavutada soovitud eesmärki, kuid töö käigus õppisime palju ning oskame enam-vähem määratleda enda vigu.
