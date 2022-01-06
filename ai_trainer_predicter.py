@@ -1,8 +1,11 @@
 import cv2 as cv
 import numpy as np
 import os
-import random as rn
-from PIL import Image
+
+from keras.layers import MaxPooling2D, BatchNormalization, Dropout
+from keras.models import Model
+from keras.layers import Input, Conv2D, Activation, Flatten, Dense
+from tensorflow.keras.optimizers import Adam
 
 BUILD_DIR = "./build/"
 BUILD_DIR_MARKED = BUILD_DIR + "marked/"
@@ -49,10 +52,26 @@ def get_train_data():
 
     return (marked_imgs, unmarked_imgs, coordinates)
 
-get_train_data()
-
 def train_model():
-    model = None
+    x = Input(shape=(210, 130))
+    c1 = Conv2D(210, (3, 3), strides=1, padding="same")(x)
+    b1 = BatchNormalization()(c1)
+    a1 = Activation('relu')(b1)
+    c2 = Conv2D(32, (3, 3), strides=1, padding="valid")(a1)
+    b2 = BatchNormalization()(c2)
+    a2 = Activation('relu')(b2)
+    p2 = MaxPooling2D(pool_size=(2,2))(a2)
+    d2 = Dropout(0.25)(p2)
+    f2 = Flatten()(d2)
+    h3 = Dense(100)(f2)
+    b3 = BatchNormalization()(h3)
+    a3 = Activation('relu')(b3)
+    d3 = Dropout(0.25)(a3)
+    z = Dense(10)(d3)
+    p = Activation('softmax')(z)
+
+    model = Model(inputs=x, outputs=p)
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
     return model
 
 def save_model(model):
