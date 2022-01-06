@@ -1,7 +1,7 @@
 selenium
 requests
-PIL
-cv2
+Pillow
+opencv-python
 numpy
 keras
 tensorflow
