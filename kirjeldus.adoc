@@ -28,6 +28,10 @@ Ainuüksi andmete kättesaamiseks kulus korralikult üle 10 tunni tööd. Andmet
 Siis selgus, et punase täpuga oskab AI väga täpselt ennustada, mistõttu pidime leidma graafikud ilma punaste täppideta.
 Selliseid graafikuid ei leidunud, mistõttu eemladasime koodi teel punased täpid ja joonistasime jooned asemele.
 
+Palju hingi, verd ja pisaraid.
+
+Lõpptulemust ei saavutatud, sest erinevad treenitud mudelid ei suutnud korrektselt ennustada.
+
 == Testimise võimalused
 Kogu rakendus on võimeline ennast ise looma ja välja õpetama.
 Selleks tuleb jooksutada järgnevaid käsklusi järestikku.
@@ -63,6 +67,14 @@ Mudeli õpetamiseks on järgnev käsklus.
 ----
 # Teostab masinõppe
 python ai_trainer_predicter.py
+----
+
+
+Katsetamine
+[source, python]
+----
+# Katsetamine
+python ai.py 'file_path'
 ----
 
 
