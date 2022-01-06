@@ -48,41 +48,51 @@ def get_train_data():
             for x in splitted_line:
                 locs.append(tuple(int(y) for y in x.split(",")))
 
-            coordinates.append(locs)
+            data = [0 for el in range(210+130)]
+            for loc in locs:
+                data[loc[0]]= 1
+                data[130+loc[1]]= 1
+            coordinates.append(data)
+
 
     return (unmarked_imgs, coordinates)
-
 def train_model(X_train, y_train):
-    x = Input(shape=(210, 130))
-    c1 = Conv2D(210, (5, 5), strides=1, padding="same")(x)
+    input_shape = X_train[0].shape
+    x = Input(shape=input_shape)
+    c1 = Conv2D(input_shape[0], (3, 3), strides=1, padding="same")(x)
     b1 = BatchNormalization()(c1)
     a1 = Activation('relu')(b1)
-    c2 = Conv2D(210, (5, 5), strides=1, padding="valid")(a1)
+    c2 = Conv2D(input_shape[0], (3, 3), strides=1, padding="valid")(a1)
     b2 = BatchNormalization()(c2)
     a2 = Activation('relu')(b2)
-    p2 = MaxPooling2D(pool_size=(3,3))(a2)
+    p2 = MaxPooling2D(pool_size=(4,4))(a2)
     d2 = Dropout(0.25)(p2)
     f2 = Flatten()(d2)
-    h3 = Dense(100)(f2)
+    h3 = Dense(input_shape[0] + input_shape[1])(f2)
     b3 = BatchNormalization()(h3)
     a3 = Activation('relu')(b3)
     d3 = Dropout(0.25)(a3)
-    z = Dense(2,activation='softmax')(d3)
+    z = Dense(input_shape[0] + input_shape[1],activation='softmax')(d3)
 
     model = Model(inputs=x, outputs=z)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
-
+    model.summary()
     history = model.fit(X_train, y_train, batch=256, epochs=1)
+
     return model, history
+
 
 def save_model(model):
     model = None
 
 def train():
-    get_train_data()
-    model = train_model()
-    return model
+    X_train, y_train = get_train_data()
+    model, history = train_model(X_train, y_train)
+    return model, history
 
+
+model, history = train()
+model, history
 #############################
 # Predicter
 #############################
