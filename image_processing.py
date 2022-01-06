@@ -45,7 +45,7 @@ def transform_coordinates(src_dir: str, out_dir: str, rescale_factors: [(float, 
                 new_array = []
                 rescale_factor = rescale_factors[index]
                 for vector in array:
-                    new_array.append((round(vector[0] / rescale_factor[0]), round(vector[1] / rescale_factor[1])))
+                    new_array.append((min(209,round(vector[0] / rescale_factor[0])), min(129,round(vector[1] / rescale_factor[1]))))
                 dst_f.write(str(new_array) + "\n")
 
 
