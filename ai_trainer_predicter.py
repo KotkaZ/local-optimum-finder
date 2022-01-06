@@ -14,7 +14,9 @@ BUILD_DIR_MARKED = BUILD_DIR + "processed/marked/"
 BUILD_DIR_UNMARKED = BUILD_DIR + "processed/unmarked/"
 BUILD_COORDINATES_FILE = BUILD_DIR + "processed/coordinates.txt"
 BUILD_MODEL = BUILD_DIR + "model.something"
+BUILD_DIR_PREDICTED = BUILD_DIR +"predicted/"
 DEBUG_NR_PICTURES = 10
+
 
 #############################
 # Trainer
@@ -75,7 +77,7 @@ def get_train_data():
                             val = 0.75
                         else:
                             val = 0.60
-                        if not (loc[1]+x < 0 or loc[1]+x >= 130 or loc[0]+y < 0 or loc[0]+x >=210):
+                        if not (loc[1]+x < 0 or loc[1]+x >= 130 or loc[0]+y < 0 or loc[0]+y >=210):
                             data[loc[1]+x][loc[0]+y][0] = val
                 data[loc[1]][loc[0]][0]= 0.999
             coordinates.append(data)
@@ -126,50 +128,54 @@ X_train_imgs, X_test_imgs = X_imgs_unmarked[:-divider], X_imgs_unmarked[-divider
 X_train, X_test, y_train, y_test = X_imgs[:-divider], X_imgs[-divider:], y_locs[:-divider], y_locs[-divider:]
 model, history = train_model(X_train, y_train)
 
+if not os.path.isdir(BUILD_DIR_PREDICTED):
+    os.makedirs(BUILD_DIR_PREDICTED)
 y_pred = model.predict(X_test)
-test_img = np.zeros((130,210,3))
-for ri, row in enumerate(y_pred[0]):
-    for pi, px in enumerate(row):
-        val = min(int(255 * px[0]+ 178), 255)
-        test_img[ri][pi][0] = val
-        test_img[ri][pi][1] = val
-        test_img[ri][pi][2] = val
+for idx, y_img in enumerate(y_pred):
+    test_img = np.zeros((130,210,3))
+    for ri, row in enumerate(y_img):
+        for pi, px in enumerate(row):
+            val = min(int(255 * px[0]+ 178), 255)
+            test_img[ri][pi][0] = val
+            test_img[ri][pi][1] = val
+            test_img[ri][pi][2] = val
 
-max_loc = np.unravel_index(y_pred[0].argmax(), y_pred[0].shape)
+    max_loc = np.unravel_index(y_img.argmax(),y_img.shape)
+    print(max_loc)
+    print(y_img.shape)
+    final_image = X_test_imgs[idx].copy()
 
-final_image = X_test_imgs[0].copy()
+    ## add red dot
+    for i in range(6):
+        for j in range(6):
+            x = 3-i
+            y = 3-j
+            r = x**2 + y**2
+            val = 0
+            if(r <= 5):
+                val = [0,0,255]
+            elif(r <= 8):
+                val= [104,104,255]
+            elif(r <= 9):
+                val = [217,217,255]
+            else:
+                val = [255,255,255]
+            if not (max_loc[0]+ x < 0 or max_loc[0]+ x >= 130 or max_loc[1]+y < 0 or max_loc[1]+y >=210):
+                final_image[max_loc[0]+x][max_loc[1]+y] = [min(el[0],el[1]) for el in zip(final_image[max_loc[0]+x][max_loc[1]+y], val)]
 
-## add red dot
+    cv.imwrite(BUILD_DIR_PREDICTED+str(idx)+'.png', final_image)
 
-for i in range(6):
-    for j in range(6):
-        x = 3-i
-        y = 3-j
-        r = x**2 + y**2
-        val = 0
-        if(r <= 5):
-            val = [0,0,255]
-        elif(r <= 8):
-            val= [104,104,255]
-        elif(r <= 9):
-            val = [217,217,255]
-        else:
-            val = [255,255,255]
-        if not (max_loc[1]+x < 0 or max_loc[1]+x >= 130 or max_loc[0]+y < 0 or max_loc[0]+x >=210):
-            final_image[max_loc[1]+x][max_loc[0]+y] = [min(el) for el in zip(final_image[max_loc[1]+x][max_loc[0]+y], val)]
+    """cv.imshow("test", final_image)
+    cv.waitKey(0)
+    # closing all open windows
+    cv.destroyAllWindows()
 
-
-cv.imshow("test", final_image)
-cv.waitKey(0)
-# closing all open windows
-cv.destroyAllWindows()
-
-cv.imwrite('color_img.jpg', test_img)
-c = cv.imread('color_img.jpg')
-cv.imshow("test", c)
-cv.waitKey(0)
-# closing all open windows
-cv.destroyAllWindows()
+    cv.imwrite('color_img.jpg', test_img)
+    c = cv.imread('color_img.jpg')
+    cv.imshow("test", c)
+    cv.waitKey(0)
+    # closing all open windows
+    cv.destroyAllWindows() """
 
 
 #############################
