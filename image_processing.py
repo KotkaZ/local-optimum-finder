@@ -26,10 +26,10 @@ def transform_images(src_dir: str, out_dir: str) -> [(float, float)]:
         if img is None:
             continue
 
-        rescale_factors.append((img.shape[0] / X_SIZE, img.shape[1] / Y_SIZE))
+        rescale_factors.append((img.shape[0] / Y_SIZE, img.shape[1] / X_SIZE))
         img_grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-        (thresh, img_black_white) = cv.threshold(img_grey, 127, 255, cv.THRESH_BINARY)
-        crop_img = cv.resize(img_black_white, dsize=(X_SIZE, Y_SIZE), interpolation=cv.INTER_AREA)
+        #(thresh, img_black_white) = cv.threshold(img_grey, 127, 255, cv.THRESH_BINARY)
+        crop_img = cv.resize(img_grey, dsize=(X_SIZE, Y_SIZE), interpolation=cv.INTER_AREA)
 
         crop_img = crop_img[:,:-60].copy()
         new_path = out_dir + str(idx) + ".png"
@@ -54,6 +54,6 @@ if not os.path.isdir(BUILD_DIR_PROCESSED_UNMARKED):
 if not os.path.isdir(BUILD_DIR_PROCESSED_MARKED):
     os.makedirs(BUILD_DIR_PROCESSED_MARKED)
 
-factors = transform_images(BUILD_DIR_MARKED, BUILD_DIR_PROCESSED_MARKED)
-transform_images(BUILD_DIR_UNMARKED, BUILD_DIR_PROCESSED_UNMARKED)
+#factors = transform_images(BUILD_DIR_MARKED, BUILD_DIR_PROCESSED_MARKED)
+factors = transform_images(BUILD_DIR_UNMARKED, BUILD_DIR_PROCESSED_UNMARKED)
 transform_coordinates(BUILD_COORDINATES_FILE, BUILD_COORDINATES_PROCESSED_FILE, factors)

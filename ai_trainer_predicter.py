@@ -8,54 +8,59 @@ from keras.layers import Input, Conv2D, Activation, Flatten, Dense
 from tensorflow.keras.optimizers import Adam
 
 BUILD_DIR = "./build/"
-BUILD_DIR_MARKED = BUILD_DIR + "marked/"
-BUILD_DIR_UNMARKED = BUILD_DIR + "unmarked/"
-BUILD_COORDINATES_FILE = BUILD_DIR_MARKED + "coordinates.txt"
+BUILD_DIR_MARKED = BUILD_DIR + "processed/marked/"
+BUILD_DIR_UNMARKED = BUILD_DIR + "processed/unmarked/"
+BUILD_COORDINATES_FILE = BUILD_DIR + "processed/coordinates.txt"
 BUILD_MODEL = BUILD_DIR + "model.something"
-
+DEBUG_NR_PICTURES = 10
 
 #############################
 # Trainer
 #############################
 
-def load_from_dir(path:str, file_type:str)-> list:
+def load_from_dir(path:str)-> list:
     if not os.path.isdir(path):
         print("Error: {} does not exist".format(path))
         raise ValueError
     data = []
-    for idx in range(len(os.listdir(path))):
-        fpath = path + str(idx) + file_type
+    for idx in range(DEBUG_NR_PICTURES):#len(os.listdir(path))):
+        fpath = path + str(idx) + ".png"
         img = cv.imread(fpath)
         if img is None:
-            data.append(None)
+            #data.append(None)
+            print("There is no {}".format(path))
             continue
-        data.append(np.array(img))
-    return data
+        # Normaliseerime pildi
+        norm_img = np.zeros(shape = (130,210,1))
+        for ri, row in enumerate(img):
+            for pi, px in enumerate(row):
+                norm_img[ri][pi][0] = px[0]/255
+        data.append(norm_img)
+
+    return np.array(data)
 
 def get_train_data():
     if not os.path.isfile(BUILD_DIR+"coordinates.txt"):
         print("Error: {} does not exist".format("coordinates.txt"))
         raise ValueError
-
     #marked_imgs = load_from_dir(BUILD_DIR_MARKED, ".png")
-    unmarked_imgs = load_from_dir(BUILD_DIR_UNMARKED, ".jpg")
+    unmarked_imgs = load_from_dir(BUILD_DIR_UNMARKED)
     coordinates = []
     with open(BUILD_COORDINATES_FILE, "r", encoding="utf-8") as coord_file:
-        lines = coord_file.readlines()
+        lines = coord_file.readlines()[:DEBUG_NR_PICTURES]
         for line in lines:
             splitted_line = line.strip()[2:-2].replace(" ", "").split("),(")
             locs = []
             for x in splitted_line:
                 locs.append(tuple(int(y) for y in x.split(",")))
 
-            data = [0 for el in range(210+130)]
+            data = [0 for el in range(210*130)]
             for loc in locs:
-                data[loc[0]]= 1
-                data[130+loc[1]]= 1
+                data[loc[0]*loc[1]]= 1
             coordinates.append(data)
 
-
     return (unmarked_imgs, coordinates)
+
 def train_model(X_train, y_train):
     input_shape = X_train[0].shape
     x = Input(shape=input_shape)
@@ -68,13 +73,13 @@ def train_model(X_train, y_train):
     p2 = MaxPooling2D(pool_size=(4,4))(a2)
     d2 = Dropout(0.25)(p2)
     f2 = Flatten()(d2)
-    h3 = Dense(input_shape[0] + input_shape[1])(f2)
-    b3 = BatchNormalization()(h3)
+    #h3 = Dense(input_shape[0] * input_shape[1],activation='softmax')(f2)
+    """ b3 = BatchNormalization()(h3)
     a3 = Activation('relu')(b3)
     d3 = Dropout(0.25)(a3)
-    z = Dense(input_shape[0] + input_shape[1],activation='softmax')(d3)
+    z = Dense(input_shape[0] + input_shape[1],activation='softmax')(d3) """
 
-    model = Model(inputs=x, outputs=z)
+    model = Model(inputs=x, outputs=f2)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
     model.summary()
     history = model.fit(X_train, y_train, batch=256, epochs=1)
