@@ -1,6 +1,4 @@
 import cv2 as cv
-import numpy as np
-import os
 
 BUILD_DIR = "./build/"
 BUILD_DIR_MARKED = BUILD_DIR + "marked/"
