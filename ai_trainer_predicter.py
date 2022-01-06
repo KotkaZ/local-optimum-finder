@@ -180,8 +180,3 @@ def predict(norm_imgs, actual_imgs, show_imgs):
         cv.imwrite(BUILD_DIR_PREDICTED+str(idx)+'.png', final_image)
         if show_imgs:
             show_answer(final_image)
-
-
-train()
-norm_imgs, actual_imgs = load_from_dir(BUILD_DIR_PROCESSED_UNMARKED)
-predict(norm_imgs,actual_imgs)
