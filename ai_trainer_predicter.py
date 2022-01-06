@@ -84,11 +84,15 @@ def train_model(X_train, y_train):
     input_shape = X_train[0].shape
     x = Input(shape=input_shape)
     c1 = Conv2D(64, (3, 3), strides=1, padding="same")(x)
-    c2 = Conv2D(64, (3, 3), strides=1, padding="same")(c1)
-    c3 = Conv2D(4, (3, 3), strides=1, padding="same")(c2)
+    b1 = BatchNormalization()(c1)
+    a1 = Activation('relu')(b1)
+    c2 = Conv2D(64, (3, 3), strides=1, padding="same")(a1)
+    b2 = BatchNormalization()(c2)
+    a2 = Activation('relu')(b2)
+    c3 = Conv2D(4, (3, 3), strides=1, padding="same")(a2)
     p4 = MaxPooling2D(pool_size=(2,2))(c3)
-    f5 = Flatten()(p4)
-    r6 = Reshape((130,210,1))(f5)
+    #h4 = Dense(input_shape[0] * input_shape[1],activation='softmax')(f4)
+    r4 = Reshape((130,210,1))(p4)
     """
     b1 = BatchNormalization()(c1)
     a1 = Activation('relu')(b1)
@@ -102,18 +106,16 @@ def train_model(X_train, y_train):
     d3 = Dropout(0.25)(a3)
     z = Dense(input_shape[0] + input_shape[1],activation='softmax')(d3) """
 
-    model = Model(inputs=x, outputs=r6)
+    model = Model(inputs=x, outputs=r4)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
     model.summary()
-    history = model.fit(X_train, y_train, batch_size=256, epochs=1,verbose = True)
+    history = model.fit(X_train, y_train, batch_size=16, epochs=1,verbose = True)
 
     return model, history
 
 
 def save_model(model):
     model = None
-
-
 
 
 X_train, y_train = get_train_data()
@@ -124,11 +126,17 @@ y_pred = model.predict(X_test)
 test_img = np.zeros((130,210,3))
 for ri, row in enumerate(y_pred[0]):
     for pi, px in enumerate(row):
-        val = int(255 * px[0])
+        val = min(int(255 * px[0]+ 178), 255)
         test_img[ri][pi][0] = val
         test_img[ri][pi][1] = val
         test_img[ri][pi][2] = val
-cv.imshow("test", test_img)
+
+
+cv.imwrite('color_img.jpg', test_img)
+
+
+c = cv.imread('color_img.jpg')
+cv.imshow("test", c)
 cv.waitKey(0)
 # closing all open windows
 cv.destroyAllWindows()
