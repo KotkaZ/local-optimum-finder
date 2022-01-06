@@ -24,7 +24,8 @@ def load_from_dir(path:str)-> list:
     if not os.path.isdir(path):
         print("Error: {} does not exist".format(path))
         raise ValueError
-    data = []
+    imgs_norm = []
+    imgs = []
     for idx in range(DEBUG_NR_PICTURES):#len(os.listdir(path))):
         fpath = path + str(idx) + ".png"
         img = cv.imread(fpath)
@@ -38,16 +39,17 @@ def load_from_dir(path:str)-> list:
         for ri, row in enumerate(img):
             for pi, px in enumerate(row):
                 norm_img[ri][pi][0] = px[0]/255
-        data.append(norm_img)
+        imgs_norm.append(norm_img)
+        imgs.append(img)
 
-    return data
+    return imgs_norm, imgs
 
 def get_train_data():
     if not os.path.isfile(BUILD_DIR+"coordinates.txt"):
         print("Error: {} does not exist".format("coordinates.txt"))
         raise ValueError
     #marked_imgs = load_from_dir(BUILD_DIR_MARKED, ".png")
-    unmarked_imgs = load_from_dir(BUILD_DIR_UNMARKED)
+    unmarked_norm_imgs, unmarked_imgs = load_from_dir(BUILD_DIR_UNMARKED)
     coordinates = []
     with open(BUILD_COORDINATES_FILE, "r", encoding="utf-8") as coord_file:
         lines = coord_file.readlines()[:DEBUG_NR_PICTURES]
@@ -78,7 +80,7 @@ def get_train_data():
                 data[loc[1]][loc[0]][0]= 0.999
             coordinates.append(data)
 
-    return (np.array(unmarked_imgs), np.array(coordinates))
+    return (np.array(unmarked_norm_imgs), np.array(coordinates), np.array(unmarked_imgs))
 
 def train_model(X_train, y_train):
     input_shape = X_train[0].shape
@@ -118,8 +120,10 @@ def save_model(model):
     model = None
 
 
-X_train, y_train = get_train_data()
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.2, random_state=12)
+X_imgs, y_locs, X_imgs_unmarked = get_train_data()
+divider = int(len(X_imgs) * 0.2)
+X_train_imgs, X_test_imgs = X_imgs_unmarked[:-divider], X_imgs_unmarked[-divider:]
+X_train, X_test, y_train, y_test = X_imgs[:-divider], X_imgs[-divider:], y_locs[:-divider], y_locs[-divider:]
 model, history = train_model(X_train, y_train)
 
 y_pred = model.predict(X_test)
@@ -131,10 +135,36 @@ for ri, row in enumerate(y_pred[0]):
         test_img[ri][pi][1] = val
         test_img[ri][pi][2] = val
 
+max_loc = np.unravel_index(y_pred[0].argmax(), y_pred[0].shape)
+
+final_image = X_test_imgs[0].copy()
+
+## add red dot
+
+for i in range(6):
+    for j in range(6):
+        x = 3-i
+        y = 3-j
+        r = x**2 + y**2
+        val = 0
+        if(r <= 5):
+            val = [0,0,255]
+        elif(r <= 8):
+            val= [104,104,255]
+        elif(r <= 9):
+            val = [217,217,255]
+        else:
+            val = [255,255,255]
+        if not (max_loc[1]+x < 0 or max_loc[1]+x >= 130 or max_loc[0]+y < 0 or max_loc[0]+x >=210):
+            final_image[max_loc[1]+x][max_loc[0]+y] = [min(el) for el in zip(final_image[max_loc[1]+x][max_loc[0]+y], val)]
+
+
+cv.imshow("test", final_image)
+cv.waitKey(0)
+# closing all open windows
+cv.destroyAllWindows()
 
 cv.imwrite('color_img.jpg', test_img)
-
-
 c = cv.imread('color_img.jpg')
 cv.imshow("test", c)
 cv.waitKey(0)
